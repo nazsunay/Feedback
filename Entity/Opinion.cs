@@ -9,7 +9,7 @@
         Bug,
         Feature
     }
-  
+
     public class Opinion
     {
         public int Id { get; set; }              // Primary key
@@ -22,9 +22,11 @@
         // İlişkiler
         public int UserId { get; set; }          // İlişkili kullanıcının ID'si
         public User User { get; set; }           // İlişkili kullanıcı
-       
-        public ICollection<Comment> Comments { get; set; } // Geri bildirime yapılan yorumlar
-        public Vote Votes { get; set; }
-        public int VoteId {  get; set; }
+
+        public ICollection<Comment> Comments { get; set; } // Yorumlar
+        public ICollection<Vote> Votes { get; set; }        // Oylar
+
+        public int VoteCount { get; set; } // Oy sayısı
     }
+
 }

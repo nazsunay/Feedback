@@ -54,7 +54,7 @@ namespace Feedback.Controllers
                 Category = opinion.Category,
                 CreatedAt = opinion.CreatedAt,
                 UserId = opinion.UserId,
-                VoteId = opinion.VoteId,
+                
             };
 
             return dto;
@@ -154,7 +154,7 @@ namespace Feedback.Controllers
             return Ok(); // Başarılı silme sonrası 204 No Content
         }
 
-
+        
 
     }
 }
