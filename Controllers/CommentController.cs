@@ -29,7 +29,8 @@ namespace Feedback.Controllers
                     Content = c.Content,
                     CreatedAt = c.CreatedAt,
                     UserId = c.UserId,
-                    OpinionId = c.OpinionId
+                    OpinionId = c.OpinionId,
+                    ParentCommentId = c.ParentCommentId // Alt yorum ID'si
                 })
                 .ToListAsync();
 
@@ -42,13 +43,24 @@ namespace Feedback.Controllers
         {
             var comment = await _context.Comments
                 .Include(c => c.User)
+                .Include(c => c.Replies) // Alt yorumları dahil et
                 .Select(c => new CommentDto
                 {
                     Id = c.Id,
                     Content = c.Content,
                     CreatedAt = c.CreatedAt,
                     UserId = c.UserId,
-                    OpinionId= c.OpinionId
+                    OpinionId = c.OpinionId,
+                    ParentCommentId = c.ParentCommentId,
+                    Replies = c.Replies.Select(r => new CommentDto
+                    {
+                        Id = r.Id,
+                        Content = r.Content,
+                        CreatedAt = r.CreatedAt,
+                        UserId = r.UserId,
+                        OpinionId = r.OpinionId,
+                        ParentCommentId = r.ParentCommentId
+                    }).ToList() // Alt yorumları DTO olarak dön
                 })
                 .FirstOrDefaultAsync(c => c.Id == id);
 
@@ -76,7 +88,8 @@ namespace Feedback.Controllers
                 Content = commentDto.Content,
                 CreatedAt = DateTime.UtcNow,
                 UserId = commentDto.UserId,
-                OpinionId = commentDto.OpinionId // Burada OpinionId'yi ayarlıyoruz
+                OpinionId = commentDto.OpinionId,
+                ParentCommentId = commentDto.ParentCommentId // Alt yorum için ID
             };
 
             _context.Comments.Add(comment);
@@ -86,7 +99,6 @@ namespace Feedback.Controllers
 
             return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, commentDto);
         }
-
 
         // PUT: api/comment/{id}
         [HttpPut("{id}")]
@@ -105,7 +117,6 @@ namespace Feedback.Controllers
 
             comment.Content = commentDto.Content;
             comment.UserId = commentDto.UserId;
-            // Update CreatedAt or keep it unchanged based on your requirements
 
             _context.Entry(comment).State = EntityState.Modified;
 
