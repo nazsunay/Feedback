@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Feedback.Data;
 using Feedback.Entity;
+using static Feedback.Dto.DtoAddOpinion;
 
 namespace Feedback.Controllers
 {
@@ -30,17 +31,33 @@ namespace Feedback.Controllers
 
         // GET: api/Opinions/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Opinion>> GetOpinion(int id)
+        public async Task<ActionResult<DtoOpinion>> GetOpinion(int id)
         {
-            var opinion = await _context.Opinions.FindAsync(id);
+            var opinion = await _context.Opinions
+                .Include(o => o.User)
+                .Include(o => o.Ticket)
+                .FirstOrDefaultAsync(o => o.Id == id);
 
             if (opinion == null)
             {
                 return NotFound();
             }
 
-            return opinion;
+            var dto = new DtoOpinion
+            {
+                Id = opinion.Id,
+                Title = opinion.Title,
+                Description = opinion.Description,
+                Status = opinion.Status,
+                Category = opinion.Category,
+                CreatedAt = opinion.CreatedAt,
+                UserId = opinion.UserId,
+                TicketId = opinion.TicketId
+            };
+
+            return dto;
         }
+
 
         // PUT: api/Opinions/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
