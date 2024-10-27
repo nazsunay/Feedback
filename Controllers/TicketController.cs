@@ -1,4 +1,5 @@
 ﻿using Feedback.Data;
+using Feedback.Dto;
 using Feedback.Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,6 @@ namespace Feedback.Controllers
         {
             _context = context;
         }
-        // GET: api/ticket
         [HttpGet]
         public ActionResult<IEnumerable<Ticket>> GetTickets()
         {
@@ -37,9 +37,17 @@ namespace Feedback.Controllers
 
         // POST: api/ticket
         [HttpPost]
-        public ActionResult<Ticket> CreateTicket(Ticket ticket)
+        public ActionResult<Ticket> CreateTicket(DtoAddTicket dtoAddTicket)
         {
-            ticket.CreatedAt = DateTime.UtcNow;
+            // DTO'dan yeni Ticket nesnesi oluşturun
+            var ticket = new Ticket
+            {
+                // DTO'daki alanları Ticket nesnesine atayın
+                Title = dtoAddTicket.Title,
+                Description = dtoAddTicket.Description,
+                CreatedAt = DateTime.UtcNow
+            };
+
             _context.Tickets.Add(ticket);
             _context.SaveChanges();
 
@@ -48,15 +56,19 @@ namespace Feedback.Controllers
 
         // PUT: api/ticket/{id}
         [HttpPut("{id}")]
-        public IActionResult UpdateTicket(int id, Ticket ticket)
+        public IActionResult UpdateTicket(int id, DtoAddTicket dtoAddTicket)
         {
-            if (id != ticket.Id)
+            var ticket = _context.Tickets.Find(id);
+            if (ticket == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
+            ticket.Title = dtoAddTicket.Title;
+            ticket.Description = dtoAddTicket.Description;
             ticket.UpdatedAt = DateTime.UtcNow;
-            _context.Entry(ticket).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+
+            _context.Entry(ticket).State = EntityState.Modified;
 
             try
             {
