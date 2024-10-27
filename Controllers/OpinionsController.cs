@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Feedback.Data;
 using Feedback.Entity;
 using static Feedback.Dto.DtoAddOpinion;
+using Feedback.Dto;
 
 namespace Feedback.Controllers
 {
@@ -31,7 +32,7 @@ namespace Feedback.Controllers
 
         // GET: api/Opinions/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<DtoOpinion>> GetOpinion(int id)
+        public async Task<ActionResult<DtoAddOpinion>> GetOpinion(int id)
         {
             var opinion = await _context.Opinions
                 .Include(o => o.User)
@@ -43,7 +44,7 @@ namespace Feedback.Controllers
                 return NotFound();
             }
 
-            var dto = new DtoOpinion
+            var dto = new DtoAddOpinion
             {
                 Id = opinion.Id,
                 Title = opinion.Title,
