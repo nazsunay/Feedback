@@ -1,4 +1,7 @@
 
+using Feedback.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace Feedback
 {
     public class Program
@@ -14,10 +17,14 @@ namespace Feedback
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
