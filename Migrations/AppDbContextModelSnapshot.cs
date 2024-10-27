@@ -75,9 +75,6 @@ namespace Feedback.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TicketId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -87,45 +84,9 @@ namespace Feedback.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TicketId");
-
                     b.HasIndex("UserId");
 
                     b.ToTable("Opinions");
-                });
-
-            modelBuilder.Entity("Feedback.Entity.Ticket", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Tickets");
                 });
 
             modelBuilder.Entity("Feedback.Entity.User", b =>
@@ -206,19 +167,11 @@ namespace Feedback.Migrations
 
             modelBuilder.Entity("Feedback.Entity.Opinion", b =>
                 {
-                    b.HasOne("Feedback.Entity.Ticket", "Ticket")
-                        .WithMany("Opinions")
-                        .HasForeignKey("TicketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Feedback.Entity.User", "User")
                         .WithMany("Opinions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Ticket");
 
                     b.Navigation("User");
                 });
@@ -247,11 +200,6 @@ namespace Feedback.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("Votes");
-                });
-
-            modelBuilder.Entity("Feedback.Entity.Ticket", b =>
-                {
-                    b.Navigation("Opinions");
                 });
 
             modelBuilder.Entity("Feedback.Entity.User", b =>

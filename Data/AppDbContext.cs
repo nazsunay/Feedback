@@ -10,7 +10,6 @@ namespace Feedback.Data
         }
 
         public DbSet<User> Users { get; set; }
-        public DbSet<Ticket> Tickets { get; set; }
         public DbSet<Opinion> Opinions { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Vote> Votes { get; set; }
@@ -20,10 +19,6 @@ namespace Feedback.Data
             base.OnModelCreating(modelBuilder);
 
             // Enumları string olarak saklama
-            modelBuilder.Entity<Ticket>()
-                .Property(t => t.Status)
-                .HasConversion<string>();
-
             modelBuilder.Entity<Opinion>()
                 .Property(f => f.Status)
                 .HasConversion<string>();
@@ -52,13 +47,6 @@ namespace Feedback.Data
                 .WithMany(u => u.Votes)
                 .HasForeignKey(v => v.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            // Ticket - Feedback ilişki tanımı
-            modelBuilder.Entity<Opinion>()
-                .HasOne(f => f.Ticket)
-                .WithMany(t => t.Opinions)
-                .HasForeignKey(f => f.TicketId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             // Feedback - Comment ilişki tanımı
             modelBuilder.Entity<Comment>()
