@@ -5,7 +5,8 @@
         Open,
         Closed,
         InProgress,
-        
+        Pending // Yeni durum eklendi
+
     }
     public enum OpinionStatus
     {
