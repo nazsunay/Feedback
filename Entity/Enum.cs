@@ -4,7 +4,8 @@
     {
         Open,
         Closed,
-        InProgress
+        InProgress,
+        
     }
     public enum OpinionStatus
     {
