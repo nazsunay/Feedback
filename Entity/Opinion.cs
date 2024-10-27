@@ -24,6 +24,7 @@
         public User User { get; set; }           // İlişkili kullanıcı
        
         public ICollection<Comment> Comments { get; set; } // Geri bildirime yapılan yorumlar
-        public ICollection<Vote> Votes { get; set; } // Geri bildirimdeki oylar
+        public Vote Votes { get; set; }
+        public int VoteId {  get; set; }
     }
 }
