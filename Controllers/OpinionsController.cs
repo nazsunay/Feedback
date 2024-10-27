@@ -41,7 +41,7 @@ namespace Feedback.Controllers
 
             if (opinion == null)
             {
-                return NotFound();
+                return BadRequest();
             }
 
             var dto = new DtoAddOpinion
@@ -58,69 +58,101 @@ namespace Feedback.Controllers
 
             return dto;
         }
-
-
-        // PUT: api/Opinions/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutOpinion(int id, Opinion opinion)
+        // POST: api/Opinions
+        [HttpPost]
+        public async Task<ActionResult<DtoAddOpinion>> CreateOpinion(DtoAddOpinion dtoOpinion)
         {
-            if (id != opinion.Id)
+            // DTO'dan Opinion nesnesini oluşturma
+            var opinion = new Opinion
             {
-                return BadRequest();
+                Title = dtoOpinion.Title,
+                Description = dtoOpinion.Description,
+                Status = dtoOpinion.Status,
+                Category = dtoOpinion.Category,
+                CreatedAt = DateTime.UtcNow, // Oluşturulma tarihini otomatik ayarlıyoruz
+                UserId = dtoOpinion.UserId,
+                TicketId = dtoOpinion.TicketId
+            };
+
+            // Opinion nesnesini veritabanına ekliyoruz
+            _context.Opinions.Add(opinion);
+            await _context.SaveChangesAsync(); // Değişiklikleri kaydediyoruz
+
+            // Yeni eklenen Opinion'un ID'sini DTO'ya geri aktarıyoruz
+            dtoOpinion.Id = opinion.Id;
+
+            // Başarılı ekleme için 201 Created yanıtı dönüyoruz
+            return CreatedAtAction(nameof(GetOpinion), new { id = opinion.Id }, dtoOpinion);
+        }
+        // PUT: api/Opinions/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateOpinion(int id, DtoAddOpinion dtoOpinion)
+        {
+            // Güncellenmek istenen kayıt olup olmadığını kontrol ediyoruz
+            var opinion = await _context.Opinions.FindAsync(id);
+
+            if (opinion == null)
+            {
+                return BadRequest(); // Kayıt bulunamazsa 404 dön
             }
 
-            _context.Entry(opinion).State = EntityState.Modified;
+            // DTO'daki verileri mevcut Opinion nesnesine aktarma
+            opinion.Title = dtoOpinion.Title;
+            opinion.Description = dtoOpinion.Description;
+            opinion.Status = dtoOpinion.Status;
+            opinion.Category = dtoOpinion.Category;
+            opinion.UserId = dtoOpinion.UserId;
+            opinion.TicketId = dtoOpinion.TicketId;
 
+            // Değişiklikleri kaydetme
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(); // Güncelleme işlemi
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!OpinionExists(id))
+                // Güncelleme sırasında hata olursa kayıt halen mevcut mu kontrol ediyoruz
+                if (!_context.Opinions.Any(o => o.Id == id))
                 {
-                    return NotFound();
+                    return BadRequest(); // Kayıt bulunmazsa 404 dön
                 }
                 else
                 {
-                    throw;
+                    throw; // Başka bir hata olursa fırlat
                 }
             }
 
-            return NoContent();
+            return Ok(); // Başarılı güncelleme sonrası 204 No Content
         }
-
-        // POST: api/Opinions
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Opinion>> PostOpinion(Opinion opinion)
-        {
-            _context.Opinions.Add(opinion);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetOpinion", new { id = opinion.Id }, opinion);
-        }
-
         // DELETE: api/Opinions/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOpinion(int id)
         {
+            // Silinecek kaydı buluyoruz
             var opinion = await _context.Opinions.FindAsync(id);
+
             if (opinion == null)
             {
-                return NotFound();
+                return BadRequest(); // Kayıt bulunamazsa 404 döner
             }
 
+            // Kayıt siliniyor
             _context.Opinions.Remove(opinion);
-            await _context.SaveChangesAsync();
 
-            return NoContent();
+            try
+            {
+                await _context.SaveChangesAsync(); // Değişiklikleri kaydet
+            }
+            catch (Exception ex)
+            {
+                // Hata durumunda detaylı bilgi loglanabilir
+                return StatusCode(500, $"Kayıt silinirken bir hata oluştu: {ex.Message}");
+            }
+
+            return Ok(); // Başarılı silme sonrası 204 No Content
         }
 
-        private bool OpinionExists(int id)
-        {
-            return _context.Opinions.Any(e => e.Id == id);
-        }
+
+
     }
 }
