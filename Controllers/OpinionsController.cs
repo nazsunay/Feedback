@@ -36,7 +36,6 @@ namespace Feedback.Controllers
         {
             var opinion = await _context.Opinions
                 .Include(o => o.User)
-                .Include(o => o.Ticket)
                 .FirstOrDefaultAsync(o => o.Id == id);
 
             if (opinion == null)
@@ -53,7 +52,7 @@ namespace Feedback.Controllers
                 Category = opinion.Category,
                 CreatedAt = opinion.CreatedAt,
                 UserId = opinion.UserId,
-                TicketId = opinion.TicketId
+            
             };
 
             return dto;

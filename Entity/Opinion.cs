@@ -2,10 +2,12 @@
 {
     public enum OpinionCategory
     {
-        Feature,
+        All,
+        UI,
+        UX,
+        Enhancement,
         Bug,
-        Improvement,
-        Other
+        Feature
     }
   
     public class Opinion
@@ -20,8 +22,7 @@
         // İlişkiler
         public int UserId { get; set; }          // İlişkili kullanıcının ID'si
         public User User { get; set; }           // İlişkili kullanıcı
-        public int TicketId { get; set; }        // İlişkili biletin ID'si
-        public Ticket Ticket { get; set; }       // İlişkili bilet
+       
         public ICollection<Comment> Comments { get; set; } // Geri bildirime yapılan yorumlar
         public ICollection<Vote> Votes { get; set; } // Geri bildirimdeki oylar
     }
