@@ -35,7 +35,7 @@ namespace Feedback.Controllers
         public async Task<ActionResult<Opinion>> GetOpinion(int id)
         {
             var opinion = await _context.Opinions
-                .Include(o => o.User)           
+                         
                 .Include(o => o.Comments)       
                 .Include(o => o.Votes)          
                 .FirstOrDefaultAsync(o => o.Id == id);
@@ -53,7 +53,7 @@ namespace Feedback.Controllers
                 Status = opinion.Status,
                 Category = opinion.Category,
                 CreatedAt = opinion.CreatedAt,
-                UserId = opinion.UserId,
+                
                 
             };
 
@@ -72,7 +72,7 @@ namespace Feedback.Controllers
                 Status = dtoOpinion.Status,
                 Category = dtoOpinion.Category,
                 CreatedAt = DateTime.UtcNow, 
-                UserId = dtoOpinion.UserId,
+                
                 
             };
 
@@ -103,7 +103,7 @@ namespace Feedback.Controllers
             opinion.Description = dtoOpinion.Description;
             opinion.Status = dtoOpinion.Status;
             opinion.Category = dtoOpinion.Category;
-            opinion.UserId = dtoOpinion.UserId;
+            
             
 
             

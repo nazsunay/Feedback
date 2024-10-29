@@ -17,6 +17,32 @@ namespace Feedback.Controllers
         {
             _context = context;
         }
+        // GET: api/Votes
+        [HttpGet]
+        public async Task<IActionResult> GetAllVotes()
+        {
+            var votes = await _context.Votes
+                
+                .Include(v => v.Opinions) // Opinion bilgilerini dahil et
+                .ToListAsync();
+
+            if (votes == null || !votes.Any())
+            {
+                return NotFound("Hiç oy bulunamadı.");
+            }
+
+            // Listeyi DTO (Data Transfer Object) ile döndürmek isterseniz:
+            var voteList = votes.Select(v => new
+            {
+                VoteId = v.Id,
+                
+                OpinionId = v.OpinionId,
+                OpinionTitle = v.Opinions.Title
+            });
+
+            return Ok(voteList);
+        }
+
 
         // Oy ekleme işlemi
         [HttpPost("{opinionId}/votes")]

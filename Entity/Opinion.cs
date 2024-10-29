@@ -20,8 +20,8 @@
         public DateTime CreatedAt { get; set; }  // Oluşturulma tarihi
 
         // İlişkiler
-        public int UserId { get; set; }          // İlişkili kullanıcının ID'si
-        public User User { get; set; }           // İlişkili kullanıcı
+        
+        
 
         public ICollection<Comment> Comments { get; set; } // Yorumlar
         public ICollection<Vote> Votes { get; set; }        // Oylar

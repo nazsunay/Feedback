@@ -1,15 +1,16 @@
 ﻿using Feedback.Entity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Feedback.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         public AppDbContext(DbContextOptions options) : base(options)
         {
         }
 
-        public DbSet<User> Users { get; set; }
+      
         public DbSet<Opinion> Opinions { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Vote> Votes { get; set; }
@@ -27,26 +28,8 @@ namespace Feedback.Data
                 .Property(f => f.Category) // Kategori enum'u olarak kullanılacak
                 .HasConversion<string>();
 
-            // User - Feedback ilişki tanımı
-            modelBuilder.Entity<Opinion>()
-                .HasOne(f => f.User)
-                .WithMany(u => u.Opinions)
-                .HasForeignKey(f => f.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+            
 
-            // User - Comment ilişki tanımı
-            modelBuilder.Entity<Comment>()
-                .HasOne(c => c.User)
-                .WithMany(u => u.Comments)
-                .HasForeignKey(c => c.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // User - Vote ilişki tanımı
-            modelBuilder.Entity<Vote>()
-                .HasOne(v => v.User)
-                .WithMany(u => u.Votes)
-                .HasForeignKey(v => v.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             // Feedback - Comment ilişki tanımı
             modelBuilder.Entity<Comment>()
@@ -62,14 +45,7 @@ namespace Feedback.Data
                 .HasForeignKey(v => v.OpinionId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Benzersiz alan kısıtlamaları
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email)
-                .IsUnique();
-
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Username)
-                .IsUnique();
+            
         }
     }
 }

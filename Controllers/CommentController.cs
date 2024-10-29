@@ -22,13 +22,13 @@ namespace Feedback.Controllers
         public async Task<ActionResult<IEnumerable<CommentDto>>> GetComments()
         {
             var comments = await _context.Comments
-                .Include(c => c.User)
+                
                 .Select(c => new CommentDto
                 {
                     Id = c.Id,
                     Content = c.Content,
                     CreatedAt = c.CreatedAt,
-                    UserId = c.UserId,
+                    
                     OpinionId = c.OpinionId
                 })
                 .ToListAsync();
@@ -41,13 +41,13 @@ namespace Feedback.Controllers
         public async Task<ActionResult<CommentDto>> GetComment(int id)
         {
             var comment = await _context.Comments
-                .Include(c => c.User)
+                
                 .Select(c => new CommentDto
                 {
                     Id = c.Id,
                     Content = c.Content,
                     CreatedAt = c.CreatedAt,
-                    UserId = c.UserId,
+                    
                     OpinionId= c.OpinionId
                 })
                 .FirstOrDefaultAsync(c => c.Id == id);
@@ -75,7 +75,7 @@ namespace Feedback.Controllers
             {
                 Content = commentDto.Content,
                 CreatedAt = DateTime.UtcNow,
-                UserId = commentDto.UserId,
+                
                 OpinionId = commentDto.OpinionId // Burada OpinionId'yi ayarlıyoruz
             };
 
@@ -104,7 +104,7 @@ namespace Feedback.Controllers
             }
 
             comment.Content = commentDto.Content;
-            comment.UserId = commentDto.UserId;
+            
             // Update CreatedAt or keep it unchanged based on your requirements
 
             _context.Entry(comment).State = EntityState.Modified;
