@@ -121,12 +121,15 @@ namespace Feedback.Migrations
                     b.Property<int>("OpinionId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OpinionId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Comments");
                 });
@@ -158,10 +161,16 @@ namespace Feedback.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int>("VoteCount")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Opinions");
                 });
@@ -177,12 +186,15 @@ namespace Feedback.Migrations
                     b.Property<int>("OpinionId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OpinionId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Votes");
                 });
@@ -325,10 +337,29 @@ namespace Feedback.Migrations
                     b.HasOne("Feedback.Entity.Opinion", "Opinions")
                         .WithMany("Comments")
                         .HasForeignKey("OpinionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Feedback.Entity.ApplicationUser", "User")
+                        .WithMany("Comments")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Opinions");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Feedback.Entity.Opinion", b =>
+                {
+                    b.HasOne("Feedback.Entity.ApplicationUser", "User")
+                        .WithMany("Opinions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Feedback.Entity.Vote", b =>
@@ -336,10 +367,18 @@ namespace Feedback.Migrations
                     b.HasOne("Feedback.Entity.Opinion", "Opinions")
                         .WithMany("Votes")
                         .HasForeignKey("OpinionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Feedback.Entity.ApplicationUser", "User")
+                        .WithMany("Votes")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Opinions");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -391,6 +430,15 @@ namespace Feedback.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Feedback.Entity.ApplicationUser", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Opinions");
+
+                    b.Navigation("Votes");
                 });
 
             modelBuilder.Entity("Feedback.Entity.Opinion", b =>

@@ -20,13 +20,13 @@
         public DateTime CreatedAt { get; set; }  // Oluşturulma tarihi
 
         // İlişkiler
-        
-        
+        // İlişkiler
+        public string UserId { get; set; } // İlişkili kullanıcının ID'si
+        public ApplicationUser User { get; set; } // İlişkili kullanıcı
 
-        public ICollection<Comment> Comments { get; set; } // Yorumlar
-        public ICollection<Vote> Votes { get; set; }        // Oylar
-
-        public int VoteCount { get; set; } // Oy sayısı
+        public ICollection<Comment> Comments { get; set; }
+        public ICollection<Vote> Votes { get; set; }
+        public int VoteCount { get; set; }
     }
 
 }

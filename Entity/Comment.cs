@@ -9,8 +9,9 @@
         // İlişkiler
         public int OpinionId { get; set; }              // İlişkili geri bildirimin ID'si
         public Opinion Opinions { get; set; }           // İlişkili geri bildirim
-        public int UserId { get; set; }                  // İlişkili kullanıcının ID'si
-        
+        public String UserId { get; set; } // İlişkili kullanıcının ID'si
+        public ApplicationUser User { get; set; } // İlişkili kullanıcı
+
     }
 
 }

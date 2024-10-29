@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Feedback.Entity
 {
@@ -8,7 +9,13 @@ namespace Feedback.Entity
         public string LastName { get; set; }
         public string Avatar {  get; set; }
         public string Nickname {  get; set; }
-        public string FullName => $"{FirstName}";
+        [NotMapped]
+        public string FullName => $"{FirstName}{LastName}";
+
+        // İlişkiler
+        public ICollection<Opinion> Opinions { get; set; } = new List<Opinion>();
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public ICollection<Vote> Votes { get; set; } = new List<Vote>();
     }
     public class Register
     {
