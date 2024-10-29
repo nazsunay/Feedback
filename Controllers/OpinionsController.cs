@@ -53,7 +53,7 @@ namespace Feedback.Controllers
                 Status = opinion.Status,
                 Category = opinion.Category,
                 CreatedAt = opinion.CreatedAt,
-                
+                UserId = opinion.UserId,
                 
             };
 
@@ -103,7 +103,7 @@ namespace Feedback.Controllers
             opinion.Description = dtoOpinion.Description;
             opinion.Status = dtoOpinion.Status;
             opinion.Category = dtoOpinion.Category;
-            
+            opinion.UserId = dtoOpinion.UserId;
             
 
             
