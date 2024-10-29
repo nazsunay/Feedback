@@ -28,7 +28,7 @@ namespace Feedback.Controllers
                     Id = c.Id,
                     Content = c.Content,
                     CreatedAt = c.CreatedAt,
-                    
+                    UserId = c.UserId,
                     OpinionId = c.OpinionId
                 })
                 .ToListAsync();
@@ -47,7 +47,7 @@ namespace Feedback.Controllers
                     Id = c.Id,
                     Content = c.Content,
                     CreatedAt = c.CreatedAt,
-                    
+                    UserId= c.UserId,
                     OpinionId= c.OpinionId
                 })
                 .FirstOrDefaultAsync(c => c.Id == id);
@@ -75,7 +75,7 @@ namespace Feedback.Controllers
             {
                 Content = commentDto.Content,
                 CreatedAt = DateTime.UtcNow,
-                
+                UserId = commentDto.UserId,
                 OpinionId = commentDto.OpinionId // Burada OpinionId'yi ayarlıyoruz
             };
 
