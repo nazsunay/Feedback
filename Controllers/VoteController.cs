@@ -11,9 +11,9 @@ namespace Feedback.Controllers
     [ApiController]
     public class VoteController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly _context _context;
 
-        public VoteController(AppDbContext context)
+        public VoteController(_context context)
         {
             _context = context;
         }
@@ -98,6 +98,58 @@ namespace Feedback.Controllers
 
             return NoContent(); // Başarılı silme
         }
+
+        [HttpPost]
+        public async Task VoteForOpinion(string userId, int opinionId)
+        {
+            // Kullanıcının bu geri bildirimle ilgili bir kaydı olup olmadığını kontrol et
+            var existingFeedbackUser = await _context.FeedbackUsers
+                .FirstOrDefaultAsync(fu => fu.UserId == userId && fu.OpinionId == opinionId);
+
+            var opinion = await _context.Opinions.FindAsync(opinionId);
+
+            if (opinion == null)
+            {
+                throw new InvalidOperationException("Opinion not found.");
+            }
+
+            if (existingFeedbackUser == null)
+            {
+                // Oy yoksa yeni oy ver ve geri bildirim sayısını artır
+                var newVote = new Vote
+                {
+                    UserId = userId,
+                    OpinionId = opinionId
+                };
+
+                _context.Votes.Add(newVote);
+                opinion.VoteCount++;
+
+                var feedbackUser = new FeedbackUser
+                {
+                    UserId = userId,
+                    OpinionId = opinionId
+                };
+                _context.FeedbackUsers.Add(feedbackUser);
+            }
+            else
+            {
+                // Oy varsa oy sayısını düşür ve geri bildirim kaydını sil
+                var existingVote = await _context.Votes
+                    .FirstOrDefaultAsync(v => v.UserId == userId && v.OpinionId == opinionId);
+
+                if (existingVote != null)
+                {
+                    _context.Votes.Remove(existingVote);
+                    opinion.VoteCount--;
+                }
+
+                _context.FeedbackUsers.Remove(existingFeedbackUser);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
 
     }
 }

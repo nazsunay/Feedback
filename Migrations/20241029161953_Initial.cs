@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Feedback.Migrations
 {
-    /// <inheritdoc />
+    
     public partial class Initial : Migration
     {
-        /// <inheritdoc />
+        
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -214,6 +214,32 @@ namespace Feedback.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FeedbackUsers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    OpinionId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FeedbackUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FeedbackUsers_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_FeedbackUsers_Opinions_OpinionId",
+                        column: x => x.OpinionId,
+                        principalTable: "Opinions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Votes",
                 columns: table => new
                 {
@@ -289,6 +315,16 @@ namespace Feedback.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_FeedbackUsers_OpinionId",
+                table: "FeedbackUsers",
+                column: "OpinionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FeedbackUsers_UserId",
+                table: "FeedbackUsers",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Opinions_UserId",
                 table: "Opinions",
                 column: "UserId");
@@ -324,6 +360,9 @@ namespace Feedback.Migrations
 
             migrationBuilder.DropTable(
                 name: "Comments");
+
+            migrationBuilder.DropTable(
+                name: "FeedbackUsers");
 
             migrationBuilder.DropTable(
                 name: "Votes");

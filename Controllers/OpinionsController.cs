@@ -16,9 +16,9 @@ namespace Feedback.Controllers
     [ApiController]
     public class OpinionsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly _context _context;
 
-        public OpinionsController(AppDbContext context)
+        public OpinionsController(_context context)
         {
             _context = context;
         }
@@ -72,7 +72,7 @@ namespace Feedback.Controllers
                 Status = dtoOpinion.Status,
                 Category = dtoOpinion.Category,
                 CreatedAt = DateTime.UtcNow, 
-                
+                UserId = dtoOpinion.UserId,
                 
             };
 

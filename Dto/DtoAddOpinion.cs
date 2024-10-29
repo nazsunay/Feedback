@@ -12,6 +12,7 @@ namespace Feedback.Dto
         public DateTime CreatedAt { get; set; }  // Oluşturulma tarihi
         
         public int VoteId {  get; set; }
+        public string UserId {  get; set; }
 
     }
 }

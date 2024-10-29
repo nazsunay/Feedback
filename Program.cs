@@ -20,7 +20,7 @@ namespace Feedback
               });
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddEntityFrameworkStores<AppDbContext>()
+            .AddEntityFrameworkStores<_context>()
             .AddDefaultTokenProviders();
 
             builder.Services.AddControllers();
@@ -33,7 +33,7 @@ namespace Feedback
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddDbContext<AppDbContext>(options =>
+            builder.Services.AddDbContext<_context>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });

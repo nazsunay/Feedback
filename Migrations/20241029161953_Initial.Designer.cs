@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Feedback.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
-    [Migration("20241029152422_Initial")]
+    [DbContext(typeof(_context))]
+    [Migration("20241029161953_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -135,6 +135,30 @@ namespace Feedback.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("Feedback.Entity.FeedbackUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("OpinionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OpinionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("FeedbackUsers");
                 });
 
             modelBuilder.Entity("Feedback.Entity.Opinion", b =>
@@ -354,6 +378,25 @@ namespace Feedback.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Feedback.Entity.FeedbackUser", b =>
+                {
+                    b.HasOne("Feedback.Entity.Opinion", "Opinion")
+                        .WithMany()
+                        .HasForeignKey("OpinionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Feedback.Entity.ApplicationUser", "User")
+                        .WithMany("FeedbackUsers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Opinion");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Feedback.Entity.Opinion", b =>
                 {
                     b.HasOne("Feedback.Entity.ApplicationUser", "User")
@@ -438,6 +481,8 @@ namespace Feedback.Migrations
             modelBuilder.Entity("Feedback.Entity.ApplicationUser", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("FeedbackUsers");
 
                     b.Navigation("Opinions");
 

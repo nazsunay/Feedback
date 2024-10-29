@@ -10,9 +10,9 @@ namespace Feedback.Controllers
     [ApiController]
     public class CommentController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly _context _context;
 
-        public CommentController(AppDbContext context)
+        public CommentController(_context context)
         {
             _context = context;
         }
