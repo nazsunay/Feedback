@@ -1,4 +1,5 @@
-﻿using Feedback.Entity;
+﻿using Feedback.Data;
+using Feedback.Entity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +15,7 @@ namespace Feedback.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
+        
         public UserController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
@@ -84,5 +86,8 @@ namespace Feedback.Controllers
 
             return Ok(userInfo);
         }
+
+       
+
     }
 }
