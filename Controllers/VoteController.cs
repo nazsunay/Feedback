@@ -52,20 +52,20 @@ namespace Feedback.Controllers
         {
             if (voteDto == null)
             {
-                return BadRequest("Vote data is required.");
+                return BadRequest("Oy verisi Eksik");
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
-                return Unauthorized("User is not authenticated.");
+                return Unauthorized("Kullanıcı kimlik doğrulaması yapılmamış.");
             }
 
             // İlgili geri bildirimi bul
             var opinion = await _context.Opinions.Include(o => o.Votes).FirstOrDefaultAsync(o => o.Id == voteDto.OpinionId);
             if (opinion == null)
             {
-                return NotFound("Opinion not found.");
+                return NotFound("Geri Bildirim Bulunamadı");
             }
 
             // Kullanıcının daha önce oy verip vermediğini kontrol et
