@@ -22,15 +22,24 @@ namespace Feedback.Controllers
         public async Task<ActionResult<IEnumerable<DtoAddComment>>> GetComments()
         {
             var comments = await _context.Comments
-                .Include(c => c.FeedbackUser)
+                .Include(c => c.User)
                 .Select(c => new DtoAddComment
                 {
                     Id = c.Id,
                     Content = c.Content,
                     CreatedAt = c.CreatedAt,
-                    UserId = c.UserId,
+                    UserId = c.UserId, // UserId string olarak döndürülmeli
                     OpinionId = c.OpinionId,
-                    ParentCommentId = c.ParentCommentId // Alt yorum ID'si
+                    ParentCommentId = c.ParentCommentId, // Alt yorum ID'si
+                    Replies = c.Replies.Select(r => new DtoAddComment
+                    {
+                        Id = r.Id,
+                        Content = r.Content,
+                        CreatedAt = r.CreatedAt,
+                        UserId = r.UserId.ToString(), // Alt yorumların UserId'si
+                        OpinionId = r.OpinionId,
+                        ParentCommentId = r.ParentCommentId
+                    }).ToList() // Alt yorumları DTO olarak dön
                 })
                 .ToListAsync();
 
@@ -41,16 +50,16 @@ namespace Feedback.Controllers
         public async Task<ActionResult<DtoAddComment>> GetComment(int id)
         {
             var comment = await _context.Comments
-                .Include(c => c.FeedbackUser)
+                .Include(c => c.User)
                 .Include(c => c.Replies) // Alt yorumları dahil et
-                .ThenInclude(r => r.FeedbackUser) // Alt yorumların kullanıcılarını da dahil et
+                .ThenInclude(r => r.User) // Alt yorumların kullanıcılarını da dahil et
                 .Where(c => c.Id == id)
                 .Select(c => new DtoAddComment
                 {
                     Id = c.Id,
                     Content = c.Content,
                     CreatedAt = c.CreatedAt,
-                    UserId = c.UserId,
+                    UserId = c.UserId.ToString(), // UserId string olarak döndürülmeli
                     OpinionId = c.OpinionId,
                     ParentCommentId = c.ParentCommentId,
                     Replies = c.Replies.Select(r => new DtoAddComment
@@ -58,7 +67,7 @@ namespace Feedback.Controllers
                         Id = r.Id,
                         Content = r.Content,
                         CreatedAt = r.CreatedAt,
-                        UserId = r.UserId,
+                        UserId = r.UserId.ToString(), // Alt yorumların UserId'si
                         OpinionId = r.OpinionId,
                         ParentCommentId = r.ParentCommentId
                     }).ToList() // Alt yorumları DTO olarak dön
@@ -87,7 +96,7 @@ namespace Feedback.Controllers
             {
                 Content = commentDto.Content,
                 CreatedAt = DateTime.UtcNow,
-                UserId = commentDto.UserId,
+                UserId = commentDto.UserId, // UserId integer olarak atanmalı
                 OpinionId = commentDto.OpinionId,
                 ParentCommentId = commentDto.ParentCommentId // Alt yorum için ID
             };
@@ -116,7 +125,7 @@ namespace Feedback.Controllers
             }
 
             comment.Content = commentDto.Content;
-            comment.UserId = commentDto.UserId;
+            comment.UserId = commentDto.UserId; // UserId integer olarak güncellenmeli
 
             _context.Entry(comment).State = EntityState.Modified;
 
@@ -162,4 +171,6 @@ namespace Feedback.Controllers
             return _context.Comments.Any(e => e.Id == id);
         }
     }
+
 }
+
