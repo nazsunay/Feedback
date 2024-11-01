@@ -22,7 +22,7 @@ namespace Feedback.Controllers
         public async Task<ActionResult<IEnumerable<DtoAddComment>>> GetComments()
         {
             var comments = await _context.Comments
-                .Include(c => c.User)
+                .Include(c => c.FeedbackUser)
                 .Select(c => new DtoAddComment
                 {
                     Id = c.Id,
@@ -41,9 +41,9 @@ namespace Feedback.Controllers
         public async Task<ActionResult<DtoAddComment>> GetComment(int id)
         {
             var comment = await _context.Comments
-                .Include(c => c.User)
+                .Include(c => c.FeedbackUser)
                 .Include(c => c.Replies) // Alt yorumları dahil et
-                .ThenInclude(r => r.User) // Alt yorumların kullanıcılarını da dahil et
+                .ThenInclude(r => r.FeedbackUser) // Alt yorumların kullanıcılarını da dahil et
                 .Where(c => c.Id == id)
                 .Select(c => new DtoAddComment
                 {
