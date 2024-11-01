@@ -1,6 +1,6 @@
 ﻿namespace Feedback.Dto
 {
-    public class CommentDto
+    public class DtoAddComment
     {
         public int Id { get; set; }
         public string Content { get; set; }
@@ -10,6 +10,6 @@
         public int? ParentCommentId { get; set; }
 
         // Alt yorumları ekleyelim
-        public List<CommentDto> Replies { get; set; } = new List<CommentDto>();
+        public List<DtoAddComment> Replies { get; set; } = new List<DtoAddComment>();
     }
 }
