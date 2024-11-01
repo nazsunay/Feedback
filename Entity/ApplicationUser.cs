@@ -40,7 +40,7 @@ namespace Feedback.Entity
     {
         public int Id { get; set; } // Primary key
         public string UserId { get; set; } // İlişkili kullanıcının ID'si
-        public int OpinionId { get; set; } // İlişkili geri bildirimin ID'si (int olarak değiştirdik)
+        public int OpinionId { get; set; } // İlişkili geri bildirimin ID'si (int olarak değiştirdik) 
         public ApplicationUser User { get; set; } // İlişkili kullanıcı
         public Opinion Opinion { get; set; } // İlişkili geri bildirim
     }
