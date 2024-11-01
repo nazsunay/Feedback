@@ -37,13 +37,14 @@ namespace Feedback.Controllers
             return comments;
         }
 
-        // GET: api/comment/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<CommentDto>> GetComment(int id)
         {
             var comment = await _context.Comments
                 .Include(c => c.User)
                 .Include(c => c.Replies) // Alt yorumları dahil et
+                .ThenInclude(r => r.User) // Alt yorumların kullanıcılarını da dahil et
+                .Where(c => c.Id == id)
                 .Select(c => new CommentDto
                 {
                     Id = c.Id,
@@ -62,7 +63,7 @@ namespace Feedback.Controllers
                         ParentCommentId = r.ParentCommentId
                     }).ToList() // Alt yorumları DTO olarak dön
                 })
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .FirstOrDefaultAsync();
 
             if (comment == null)
             {
@@ -72,7 +73,6 @@ namespace Feedback.Controllers
             return comment;
         }
 
-        // POST: api/comment
         [HttpPost]
         public async Task<ActionResult<CommentDto>> PostComment(CommentDto commentDto)
         {
@@ -95,7 +95,7 @@ namespace Feedback.Controllers
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();
 
-            commentDto.Id = comment.Id; // Set the Id of the newly created comment
+            commentDto.Id = comment.Id; // Yeni oluşturulan yorumun ID'sini ata
 
             return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, commentDto);
         }
@@ -139,11 +139,13 @@ namespace Feedback.Controllers
             return NoContent();
         }
 
-        // DELETE: api/comment/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteComment(int id)
         {
-            var comment = await _context.Comments.FindAsync(id);
+            var comment = await _context.Comments
+                .Include(c => c.Replies) // Alt yorumları dahil et
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             if (comment == null)
             {
                 return NotFound();
