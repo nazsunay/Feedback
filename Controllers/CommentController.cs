@@ -4,173 +4,170 @@ using Feedback.Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Feedback.Controllers
+[ApiController]
+[Route("api/[controller]")]
+public class CommentController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class CommentController : ControllerBase
+    private readonly _context _context;
+
+    public CommentController(_context context)
     {
-        private readonly _context _context;
-
-        public CommentController(_context context)
-        {
-            _context = context;
-        }
-
-        // GET: api/comment
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<DtoAddComment>>> GetComments()
-        {
-            var comments = await _context.Comments
-                .Include(c => c.User)
-                .Select(c => new DtoAddComment
-                {
-                    Id = c.Id,
-                    Content = c.Content,
-                    CreatedAt = c.CreatedAt,
-                    UserId = c.UserId, // UserId string olarak döndürülmeli
-                    OpinionId = c.OpinionId,
-                    ParentCommentId = c.ParentCommentId, // Alt yorum ID'si
-                    Replies = c.Replies.Select(r => new DtoAddComment
-                    {
-                        Id = r.Id,
-                        Content = r.Content,
-                        CreatedAt = r.CreatedAt,
-                        UserId = r.UserId.ToString(), // Alt yorumların UserId'si
-                        OpinionId = r.OpinionId,
-                        ParentCommentId = r.ParentCommentId
-                    }).ToList() // Alt yorumları DTO olarak dön
-                })
-                .ToListAsync();
-
-            return comments;
-        }
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<DtoAddComment>> GetComment(int id)
-        {
-            var comment = await _context.Comments
-                .Include(c => c.User)
-                .Include(c => c.Replies) // Alt yorumları dahil et
-                .ThenInclude(r => r.User) // Alt yorumların kullanıcılarını da dahil et
-                .Where(c => c.Id == id)
-                .Select(c => new DtoAddComment
-                {
-                    Id = c.Id,
-                    Content = c.Content,
-                    CreatedAt = c.CreatedAt,
-                    UserId = c.UserId.ToString(), // UserId string olarak döndürülmeli
-                    OpinionId = c.OpinionId,
-                    ParentCommentId = c.ParentCommentId,
-                    Replies = c.Replies.Select(r => new DtoAddComment
-                    {
-                        Id = r.Id,
-                        Content = r.Content,
-                        CreatedAt = r.CreatedAt,
-                        UserId = r.UserId.ToString(), // Alt yorumların UserId'si
-                        OpinionId = r.OpinionId,
-                        ParentCommentId = r.ParentCommentId
-                    }).ToList() // Alt yorumları DTO olarak dön
-                })
-                .FirstOrDefaultAsync();
-
-            if (comment == null)
-            {
-                return NotFound();
-            }
-
-            return comment;
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<DtoAddComment>> PostComment(DtoAddComment commentDto)
-        {
-            // Geçerli bir OpinionId kontrolü
-            var opinionExists = await _context.Opinions.AnyAsync(o => o.Id == commentDto.OpinionId);
-            if (!opinionExists)
-            {
-                return BadRequest("Geçersiz görüş ID.");
-            }
-
-            var comment = new Comment
-            {
-                Content = commentDto.Content,
-                CreatedAt = DateTime.UtcNow,
-                UserId = commentDto.UserId, // UserId integer olarak atanmalı
-                OpinionId = commentDto.OpinionId,
-                ParentCommentId = commentDto.ParentCommentId // Alt yorum için ID
-            };
-
-            _context.Comments.Add(comment);
-            await _context.SaveChangesAsync();
-
-            commentDto.Id = comment.Id; // Yeni oluşturulan yorumun ID'sini ata
-
-            return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, commentDto);
-        }
-
-        // PUT: api/comment/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutComment(int id, DtoAddComment commentDto)
-        {
-            if (id != commentDto.Id)
-            {
-                return BadRequest();
-            }
-
-            var comment = await _context.Comments.FindAsync(id);
-            if (comment == null)
-            {
-                return NotFound();
-            }
-
-            comment.Content = commentDto.Content;
-            comment.UserId = commentDto.UserId; // UserId integer olarak güncellenmeli
-
-            _context.Entry(comment).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CommentExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteComment(int id)
-        {
-            var comment = await _context.Comments
-                .Include(c => c.Replies) // Alt yorumları dahil et
-                .FirstOrDefaultAsync(c => c.Id == id);
-
-            if (comment == null)
-            {
-                return NotFound();
-            }
-
-            _context.Comments.Remove(comment);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool CommentExists(int id)
-        {
-            return _context.Comments.Any(e => e.Id == id);
-        }
+        _context = context;
     }
 
-}
+    // GET: api/comment
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<DtoAddComment>>> GetComments()
+    {
+        var comments = await _context.Comments
+            .Include(c => c.User)
+            .Include(c => c.Replies)
+            .ThenInclude(r => r.User)
+            .Select(c => new DtoAddComment
+            {
+                Id = c.Id,
+                Content = c.Content,
+                CreatedAt = c.CreatedAt,
+                UserId = c.UserId,
+                OpinionId = c.OpinionId,
+                ParentCommentId = c.ParentCommentId,
+                Replies = c.Replies.Select(r => new DtoAddComment
+                {
+                    Id = r.Id,
+                    Content = r.Content,
+                    CreatedAt = r.CreatedAt,
+                    UserId = r.UserId,
+                    OpinionId = r.OpinionId,
+                    ParentCommentId = r.ParentCommentId
+                }).ToList()
+            })
+            .ToListAsync();
 
+        return comments;
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<DtoAddComment>> GetComment(int id)
+    {
+        var comment = await _context.Comments
+            .Include(c => c.User)
+            .Include(c => c.Replies)
+            .ThenInclude(r => r.User)
+            .Where(c => c.Id == id)
+            .Select(c => new DtoAddComment
+            {
+                Id = c.Id,
+                Content = c.Content,
+                CreatedAt = c.CreatedAt,
+                UserId = c.UserId,
+                OpinionId = c.OpinionId,
+                ParentCommentId = c.ParentCommentId,
+                Replies = c.Replies.Select(r => new DtoAddComment
+                {
+                    Id = r.Id,
+                    Content = r.Content,
+                    CreatedAt = r.CreatedAt,
+                    UserId = r.UserId,
+                    OpinionId = r.OpinionId,
+                    ParentCommentId = r.ParentCommentId
+                }).ToList()
+            })
+            .FirstOrDefaultAsync();
+
+        if (comment == null)
+        {
+            return NotFound();
+        }
+
+        return comment;
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<DtoAddComment>> PostComment(DtoAddComment commentDto)
+    {
+        // Geçerli bir OpinionId kontrolü
+        var opinionExists = await _context.Opinions.AnyAsync(o => o.Id == commentDto.OpinionId);
+        if (!opinionExists)
+        {
+            return BadRequest("Geçersiz görüş ID.");
+        }
+
+        var comment = new Comment
+        {
+            Content = commentDto.Content,
+            CreatedAt = DateTime.UtcNow,
+            UserId = commentDto.UserId,
+            OpinionId = commentDto.OpinionId,
+            ParentCommentId = commentDto.ParentCommentId // Alt yorum için ID
+        };
+
+        _context.Comments.Add(comment);
+        await _context.SaveChangesAsync();
+
+        commentDto.Id = comment.Id; // Yeni oluşturulan yorumun ID'sini ata
+
+        return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, commentDto);
+    }
+
+    // PUT: api/comment/{id}
+    [HttpPut("{id}")]
+    public async Task<IActionResult> PutComment(int id, DtoAddComment commentDto)
+    {
+        if (id != commentDto.Id)
+        {
+            return BadRequest();
+        }
+
+        var comment = await _context.Comments.FindAsync(id);
+        if (comment == null)
+        {
+            return NotFound();
+        }
+
+        comment.Content = commentDto.Content;
+        comment.UserId = commentDto.UserId;
+
+        _context.Entry(comment).State = EntityState.Modified;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!CommentExists(id))
+            {
+                return NotFound();
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteComment(int id)
+    {
+        var comment = await _context.Comments
+            .Include(c => c.Replies)
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (comment == null)
+        {
+            return NotFound();
+        }
+
+        _context.Comments.Remove(comment);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    private bool CommentExists(int id)
+    {
+        return _context.Comments.Any(e => e.Id == id);
+    }
+}
