@@ -19,11 +19,11 @@ namespace Feedback.Controllers
 
         // GET: api/comment
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CommentDto>>> GetComments()
+        public async Task<ActionResult<IEnumerable<DtoAddComment>>> GetComments()
         {
             var comments = await _context.Comments
                 .Include(c => c.User)
-                .Select(c => new CommentDto
+                .Select(c => new DtoAddComment
                 {
                     Id = c.Id,
                     Content = c.Content,
@@ -38,14 +38,14 @@ namespace Feedback.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<CommentDto>> GetComment(int id)
+        public async Task<ActionResult<DtoAddComment>> GetComment(int id)
         {
             var comment = await _context.Comments
                 .Include(c => c.User)
                 .Include(c => c.Replies) // Alt yorumları dahil et
                 .ThenInclude(r => r.User) // Alt yorumların kullanıcılarını da dahil et
                 .Where(c => c.Id == id)
-                .Select(c => new CommentDto
+                .Select(c => new DtoAddComment
                 {
                     Id = c.Id,
                     Content = c.Content,
@@ -53,7 +53,7 @@ namespace Feedback.Controllers
                     UserId = c.UserId,
                     OpinionId = c.OpinionId,
                     ParentCommentId = c.ParentCommentId,
-                    Replies = c.Replies.Select(r => new CommentDto
+                    Replies = c.Replies.Select(r => new DtoAddComment
                     {
                         Id = r.Id,
                         Content = r.Content,
@@ -74,7 +74,7 @@ namespace Feedback.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<CommentDto>> PostComment(CommentDto commentDto)
+        public async Task<ActionResult<DtoAddComment>> PostComment(DtoAddComment commentDto)
         {
             // Geçerli bir OpinionId kontrolü
             var opinionExists = await _context.Opinions.AnyAsync(o => o.Id == commentDto.OpinionId);
@@ -102,7 +102,7 @@ namespace Feedback.Controllers
 
         // PUT: api/comment/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutComment(int id, CommentDto commentDto)
+        public async Task<IActionResult> PutComment(int id, DtoAddComment commentDto)
         {
             if (id != commentDto.Id)
             {
