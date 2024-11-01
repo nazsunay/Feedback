@@ -41,6 +41,7 @@ namespace Feedback.Controllers
             {
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 return Ok("Kullanıcı kaydedildi.");
+                //persistent kalıcı olarak kaydedilme işlemi
             }
 
             return BadRequest(result.Errors);
@@ -51,7 +52,11 @@ namespace Feedback.Controllers
         {
             var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: false, lockoutOnFailure: false);
 
-            if (result.Succeeded) return Ok("Giriş yapıldı.");
+            if (result.Succeeded)
+            {
+                return Ok("Giriş yapıldı.");
+
+            }
 
             return Unauthorized("Bu kullanıcı bulunamadı.");
         }
@@ -60,10 +65,14 @@ namespace Feedback.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return Ok("Çıkış yapıldı.");
+            return Ok(new
+            {
+                succes = true,
+                msg = "Çıkış Yapıldı"
+            });
         }
 
-        [Authorize]//isteği göndermek için kullanıcının login olması gerkli 
+        //[Authorize]//isteği göndermek için kullanıcının login olması gerkli 
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUser()
         {
