@@ -11,8 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Feedback.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
-    [Migration("20241027115843_AddCommentHierarchy")]
+   
     partial class AddCommentHierarchy
     {
         /// <inheritdoc />
