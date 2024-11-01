@@ -19,38 +19,51 @@ namespace Feedback.Controllers
 
         // GET: api/comment
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CommentDto>>> GetComments()
+        public async Task<ActionResult<IEnumerable<DtoAddComment>>> GetComments()
         {
             var comments = await _context.Comments
-                
-                .Select(c => new CommentDto
+                .Include(c => c.User)
+                .Select(c => new DtoAddComment
                 {
                     Id = c.Id,
                     Content = c.Content,
                     CreatedAt = c.CreatedAt,
                     UserId = c.UserId,
-                    OpinionId = c.OpinionId
+                    OpinionId = c.OpinionId,
+                    ParentCommentId = c.ParentCommentId // Alt yorum ID'si
                 })
                 .ToListAsync();
 
             return comments;
         }
 
-        // GET: api/comment/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<CommentDto>> GetComment(int id)
+        public async Task<ActionResult<DtoAddComment>> GetComment(int id)
         {
             var comment = await _context.Comments
-                
-                .Select(c => new CommentDto
+                .Include(c => c.User)
+                .Include(c => c.Replies) // Alt yorumları dahil et
+                .ThenInclude(r => r.User) // Alt yorumların kullanıcılarını da dahil et
+                .Where(c => c.Id == id)
+                .Select(c => new DtoAddComment
                 {
                     Id = c.Id,
                     Content = c.Content,
                     CreatedAt = c.CreatedAt,
-                    UserId= c.UserId,
-                    OpinionId= c.OpinionId
+                    UserId = c.UserId,
+                    OpinionId = c.OpinionId,
+                    ParentCommentId = c.ParentCommentId,
+                    Replies = c.Replies.Select(r => new DtoAddComment
+                    {
+                        Id = r.Id,
+                        Content = r.Content,
+                        CreatedAt = r.CreatedAt,
+                        UserId = r.UserId,
+                        OpinionId = r.OpinionId,
+                        ParentCommentId = r.ParentCommentId
+                    }).ToList() // Alt yorumları DTO olarak dön
                 })
-                .FirstOrDefaultAsync(c => c.Id == id);
+                .FirstOrDefaultAsync();
 
             if (comment == null)
             {
@@ -60,9 +73,8 @@ namespace Feedback.Controllers
             return comment;
         }
 
-        // POST: api/comment
         [HttpPost]
-        public async Task<ActionResult<CommentDto>> PostComment(CommentDto commentDto)
+        public async Task<ActionResult<DtoAddComment>> PostComment(DtoAddComment commentDto)
         {
             // Geçerli bir OpinionId kontrolü
             var opinionExists = await _context.Opinions.AnyAsync(o => o.Id == commentDto.OpinionId);
@@ -76,21 +88,21 @@ namespace Feedback.Controllers
                 Content = commentDto.Content,
                 CreatedAt = DateTime.UtcNow,
                 UserId = commentDto.UserId,
-                OpinionId = commentDto.OpinionId // Burada OpinionId'yi ayarlıyoruz
+                OpinionId = commentDto.OpinionId,
+                ParentCommentId = commentDto.ParentCommentId // Alt yorum için ID
             };
 
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();
 
-            commentDto.Id = comment.Id; // Set the Id of the newly created comment
+            commentDto.Id = comment.Id; // Yeni oluşturulan yorumun ID'sini ata
 
             return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, commentDto);
         }
 
-
         // PUT: api/comment/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutComment(int id, CommentDto commentDto)
+        public async Task<IActionResult> PutComment(int id, DtoAddComment commentDto)
         {
             if (id != commentDto.Id)
             {
@@ -104,8 +116,7 @@ namespace Feedback.Controllers
             }
 
             comment.Content = commentDto.Content;
-            
-            // Update CreatedAt or keep it unchanged based on your requirements
+            comment.UserId = commentDto.UserId;
 
             _context.Entry(comment).State = EntityState.Modified;
 
@@ -128,11 +139,13 @@ namespace Feedback.Controllers
             return NoContent();
         }
 
-        // DELETE: api/comment/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteComment(int id)
         {
-            var comment = await _context.Comments.FindAsync(id);
+            var comment = await _context.Comments
+                .Include(c => c.Replies) // Alt yorumları dahil et
+                .FirstOrDefaultAsync(c => c.Id == id);
+
             if (comment == null)
             {
                 return NotFound();

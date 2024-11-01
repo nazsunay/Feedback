@@ -27,6 +27,34 @@ namespace Feedback.Data
                 .Property(f => f.Category)
                 .HasConversion<string>();
 
+            // User - Feedback ilişki tanımı
+            modelBuilder.Entity<Opinion>()
+                .HasOne(f => f.User)
+                .WithMany(u => u.Opinions)
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // User - Comment ilişki tanımı
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Comments)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Comment - Comment (Kendi kendine referans)
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.ParentComment)
+                .WithMany(c => c.Replies)
+                .HasForeignKey(c => c.ParentCommentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // User - Vote ilişki tanımı
+            modelBuilder.Entity<Vote>()
+                .HasOne(v => v.User)
+                .WithMany(u => u.Votes)
+                .HasForeignKey(v => v.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Feedback - Comment ilişki tanımı
             modelBuilder.Entity<Comment>()
                 .HasOne(c => c.Opinions)
