@@ -10,8 +10,9 @@ namespace Feedback.Dto
         public OpinionStatus Status { get; set; } // Geri bildirim durumu
         public OpinionCategory Category { get; set; } // Geri bildirim kategorisi
         public DateTime CreatedAt { get; set; }  // Oluşturulma tarihi
-        public int UserId { get; set; }          // İlişkili kullanıcının ID'si
-        public int TicketId { get; set; }
+        
+        public int VoteId {  get; set; }
+        public string UserId {  get; set; }
 
     }
 }

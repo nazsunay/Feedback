@@ -1,9 +1,10 @@
 ﻿using Feedback.Data;
-using Feedback.Dto;
 using Feedback.Entity;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Feedback.Controllers
 {
@@ -11,111 +12,91 @@ namespace Feedback.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public UserController(AppDbContext context)
+        
+        public UserController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
-            _context = context;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
-        // GET: api/User
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<DtoAddUser>>> GetUsers()
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(Register model)
         {
-            var users = await _context.Users
-                .Select(user => new DtoAddUser
-                {
-                    Id = user.Id,
-                    Username = user.Username,
-                    Email = user.Email,
-                    CreatedAt = user.CreatedAt,
-                    PasswordHash = user.PasswordHash
-                })
-                .ToListAsync();
-
-            return Ok(users);
-        }
-
-        // GET: api/User/{id}
-        [HttpGet("{id}")]
-        public async Task<ActionResult<DtoAddUser>> GetUser(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
+            var user = new ApplicationUser
             {
-                return NotFound();
-            }
-
-            var userDto = new DtoAddUser
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Email = user.Email,
-                CreatedAt = user.CreatedAt,
-                PasswordHash = user.PasswordHash,
+                UserName = model.Email,
+                Email = model.Email,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Avatar = model.Avatar,
+                Nickname = model.Nickname
             };
 
-            return Ok(userDto);
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (result.Succeeded)
+            {
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return Ok("Kullanıcı kaydedildi.");
+                //persistent kalıcı olarak kaydedilme işlemi
+            }
+
+            return BadRequest(result.Errors);
         }
 
-        // POST: api/User
-        [HttpPost]
-        public async Task<ActionResult<DtoAddUser>> CreateUser([FromBody] DtoAddUser newUserDto)
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(Login model)
         {
-            var newUser = new User
+            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: false, lockoutOnFailure: false);
+
+            if (result.Succeeded)
             {
-                Username = newUserDto.Username,
-                Email = newUserDto.Email,
-                CreatedAt = DateTime.UtcNow,
-                PasswordHash = newUserDto.PasswordHash // Varsayılan şifre hash'i veya şifre ayarlama işlemi yapılmalı.
+                return Ok("Giriş yapıldı.");
+
+            }
+
+            return Unauthorized("Bu kullanıcı bulunamadı.");
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return Ok(new
+            {
+                succes = true,
+                msg = "Çıkış Yapıldı"
+            });
+        }
+
+        //[Authorize]//isteği göndermek için kullanıcının login olması gerkli 
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound("Kullanıcı girişi yapılmamış.");
+            }
+
+            var userInfo = new
+            {
+                user.FirstName,
+                user.LastName,
+                user.Email,
+                user.Avatar,
+                user.Nickname
             };
 
-            _context.Users.Add(newUser);
-            await _context.SaveChangesAsync();
-
-            newUserDto.Id = newUser.Id;
-            newUserDto.CreatedAt = newUser.CreatedAt;
-
-            return CreatedAtAction(nameof(GetUser), new { id = newUser.Id }, newUserDto);
+            return Ok(userInfo);
         }
 
-        // PUT: api/User/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] DtoAddUser updatedUserDto)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
+       
 
-            // Güncellenmiş bilgileri ayarla
-            user.Username = updatedUserDto.Username;
-            user.Email = updatedUserDto.Email;
-            user.PasswordHash = updatedUserDto.PasswordHash;
-
-            _context.Entry(user).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        // DELETE: api/User/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
     }
-
-
 }

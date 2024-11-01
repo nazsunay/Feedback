@@ -1,15 +1,15 @@
 ﻿using Feedback.Entity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Feedback.Data
 {
-    public class AppDbContext : DbContext
+    public class _context : IdentityDbContext<ApplicationUser>
     {
-        public AppDbContext(DbContextOptions options) : base(options)
+        public _context(DbContextOptions options) : base(options)
         {
         }
-
-        public DbSet<User> Users { get; set; }
+        public DbSet<FeedbackUser> FeedbackUsers { get; set; } 
         public DbSet<Opinion> Opinions { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Vote> Votes { get; set; }
@@ -24,7 +24,7 @@ namespace Feedback.Data
                 .HasConversion<string>();
 
             modelBuilder.Entity<Opinion>()
-                .Property(f => f.Category) // Kategori enum'u olarak kullanılacak
+                .Property(f => f.Category)
                 .HasConversion<string>();
 
             // User - Feedback ilişki tanımı
@@ -60,23 +60,44 @@ namespace Feedback.Data
                 .HasOne(c => c.Opinions)
                 .WithMany(f => f.Comments)
                 .HasForeignKey(c => c.OpinionId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict); // Cascade'ı kaldırdık
 
             // Feedback - Vote ilişki tanımı
             modelBuilder.Entity<Vote>()
                 .HasOne(v => v.Opinions)
                 .WithMany(f => f.Votes)
                 .HasForeignKey(v => v.OpinionId)
+                .OnDelete(DeleteBehavior.Restrict); // Cascade'ı kaldırdık
+
+            // Kullanıcı - Opinion ilişkisi
+            modelBuilder.Entity<Opinion>()
+                .HasOne(o => o.User)
+                .WithMany(u => u.Opinions)
+                .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Benzersiz alan kısıtlamaları
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email)
-                .IsUnique();
+            // Kullanıcı - Comment ilişkisi
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Comments)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Username)
-                .IsUnique();
+            // Kullanıcı - FeedbackUser ilişkisi
+            modelBuilder.Entity<FeedbackUser>()
+                .HasOne(fu => fu.User)
+                .WithMany(u => u.FeedbackUsers)
+                .HasForeignKey(fu => fu.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // FeedbackUser - Opinion ilişkisi
+            modelBuilder.Entity<FeedbackUser>()
+                .HasOne(fu => fu.Opinion)
+                .WithMany()
+                .HasForeignKey(fu => fu.OpinionId)
+                .OnDelete(DeleteBehavior.Restrict); // Cascade'ı kaldırdık
         }
+
+
     }
 }

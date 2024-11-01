@@ -10,9 +10,9 @@ namespace Feedback.Controllers
     [ApiController]
     public class CommentController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly _context _context;
 
-        public CommentController(AppDbContext context)
+        public CommentController(_context context)
         {
             _context = context;
         }
@@ -22,7 +22,7 @@ namespace Feedback.Controllers
         public async Task<ActionResult<IEnumerable<CommentDto>>> GetComments()
         {
             var comments = await _context.Comments
-                .Include(c => c.User)
+                
                 .Select(c => new CommentDto
                 {
                     Id = c.Id,
