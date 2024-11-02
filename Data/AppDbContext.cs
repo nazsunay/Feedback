@@ -55,12 +55,11 @@ namespace Feedback.Data
                 .HasForeignKey(v => v.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Feedback - Comment ilişki tanımı
             modelBuilder.Entity<Comment>()
-                .HasOne(c => c.Opinions)
-                .WithMany(f => f.Comments)
-                .HasForeignKey(c => c.OpinionId)
-                .OnDelete(DeleteBehavior.Restrict); // Cascade'ı kaldırdık
+        .HasOne(c => c.Opinion) // Opinion ile olan ilişki
+        .WithMany(f => f.Comments) // Opinion'dan gelen Comments koleksiyonu
+        .HasForeignKey(c => c.OpinionId) // Foreign key
+        .OnDelete(DeleteBehavior.Restrict); // Silinme davranışı
 
             // Feedback - Vote ilişki tanımı
             modelBuilder.Entity<Vote>()
@@ -71,10 +70,10 @@ namespace Feedback.Data
 
             // Kullanıcı - Opinion ilişkisi
             modelBuilder.Entity<Opinion>()
-                .HasOne(o => o.User)
-                .WithMany(u => u.Opinions)
-                .HasForeignKey(o => o.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+               .HasOne(o => o.User)
+               .WithMany(u => u.Opinions)
+               .HasForeignKey(o => o.UserId)
+               .OnDelete(DeleteBehavior.Cascade);
 
             // Kullanıcı - Comment ilişkisi
             modelBuilder.Entity<Comment>()

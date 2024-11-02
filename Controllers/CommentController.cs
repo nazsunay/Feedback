@@ -22,7 +22,7 @@ public class CommentController : ControllerBase
         var comments = await _context.Comments
             .Include(c => c.User)
             .Include(c => c.Replies)
-            .ThenInclude(r => r.User)
+                .ThenInclude(r => r.User)
             .Select(c => new DtoAddComment
             {
                 Id = c.Id,
@@ -52,7 +52,7 @@ public class CommentController : ControllerBase
         var comment = await _context.Comments
             .Include(c => c.User)
             .Include(c => c.Replies)
-            .ThenInclude(r => r.User)
+                .ThenInclude(r => r.User)
             .Where(c => c.Id == id)
             .Select(c => new DtoAddComment
             {
