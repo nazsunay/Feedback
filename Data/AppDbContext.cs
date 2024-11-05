@@ -43,10 +43,11 @@ namespace Feedback.Data
 
             // Comment - Comment (Kendi kendine referans)
             modelBuilder.Entity<Comment>()
-                .HasOne(c => c.ParentComment)
-                .WithMany(c => c.Replies)
-                .HasForeignKey(c => c.ParentCommentId)
-                .OnDelete(DeleteBehavior.Cascade);
+    .HasOne(c => c.ParentComment)
+    .WithMany()
+    .HasForeignKey(c => c.ParentCommentId)
+    .OnDelete(DeleteBehavior.NoAction);
+
 
             // User - Vote ilişki tanımı
             modelBuilder.Entity<Vote>()
