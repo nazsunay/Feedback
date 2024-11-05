@@ -4,8 +4,8 @@ using Feedback.Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-[ApiController]
 [Route("api/[controller]")]
+[ApiController]
 public class CommentController : ControllerBase
 {
     private readonly _context _context;
@@ -21,25 +21,23 @@ public class CommentController : ControllerBase
     {
         var comments = await _context.Comments
             .Include(c => c.User)
-            .Include(c => c.Replies)
-                .ThenInclude(r => r.User)
             .Select(c => new DtoAddComment
             {
                 Id = c.Id,
                 Content = c.Content,
                 CreatedAt = c.CreatedAt,
-                UserId = c.UserId,
+                UserId = c.UserId, // UserId string olarak döndürülmeli
                 OpinionId = c.OpinionId,
-                ParentCommentId = c.ParentCommentId,
+                ParentCommentId = c.ParentCommentId, // Alt yorum ID'si
                 Replies = c.Replies.Select(r => new DtoAddComment
                 {
                     Id = r.Id,
                     Content = r.Content,
                     CreatedAt = r.CreatedAt,
-                    UserId = r.UserId,
+                    UserId = r.UserId.ToString(), // Alt yorumların UserId'si
                     OpinionId = r.OpinionId,
                     ParentCommentId = r.ParentCommentId
-                }).ToList()
+                }).ToList() // Alt yorumları DTO olarak dön
             })
             .ToListAsync();
 
@@ -51,15 +49,15 @@ public class CommentController : ControllerBase
     {
         var comment = await _context.Comments
             .Include(c => c.User)
-            .Include(c => c.Replies)
-                .ThenInclude(r => r.User)
+            .Include(c => c.Replies) // Alt yorumları dahil et
+            .ThenInclude(r => r.User) // Alt yorumların kullanıcılarını da dahil et
             .Where(c => c.Id == id)
             .Select(c => new DtoAddComment
             {
                 Id = c.Id,
                 Content = c.Content,
                 CreatedAt = c.CreatedAt,
-                UserId = c.UserId,
+                UserId = c.UserId.ToString(), // UserId string olarak döndürülmeli
                 OpinionId = c.OpinionId,
                 ParentCommentId = c.ParentCommentId,
                 Replies = c.Replies.Select(r => new DtoAddComment
@@ -67,10 +65,10 @@ public class CommentController : ControllerBase
                     Id = r.Id,
                     Content = r.Content,
                     CreatedAt = r.CreatedAt,
-                    UserId = r.UserId,
+                    UserId = r.UserId.ToString(), // Alt yorumların UserId'si
                     OpinionId = r.OpinionId,
                     ParentCommentId = r.ParentCommentId
-                }).ToList()
+                }).ToList() // Alt yorumları DTO olarak dön
             })
             .FirstOrDefaultAsync();
 
@@ -96,7 +94,7 @@ public class CommentController : ControllerBase
         {
             Content = commentDto.Content,
             CreatedAt = DateTime.UtcNow,
-            UserId = commentDto.UserId,
+            UserId = commentDto.UserId, // UserId integer olarak atanmalı
             OpinionId = commentDto.OpinionId,
             ParentCommentId = commentDto.ParentCommentId // Alt yorum için ID
         };
@@ -125,7 +123,7 @@ public class CommentController : ControllerBase
         }
 
         comment.Content = commentDto.Content;
-        comment.UserId = commentDto.UserId;
+        comment.UserId = commentDto.UserId; // UserId integer olarak güncellenmeli
 
         _context.Entry(comment).State = EntityState.Modified;
 
@@ -152,7 +150,7 @@ public class CommentController : ControllerBase
     public async Task<IActionResult> DeleteComment(int id)
     {
         var comment = await _context.Comments
-            .Include(c => c.Replies)
+            .Include(c => c.Replies) // Alt yorumları dahil et
             .FirstOrDefaultAsync(c => c.Id == id);
 
         if (comment == null)

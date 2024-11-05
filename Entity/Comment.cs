@@ -1,4 +1,5 @@
-﻿using Feedback.Entity;
+﻿
+using Feedback.Entity;
 
 public class Comment
 {

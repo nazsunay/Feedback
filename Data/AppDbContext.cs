@@ -9,7 +9,7 @@ namespace Feedback.Data
         public _context(DbContextOptions options) : base(options)
         {
         }
-        public DbSet<FeedbackUser> FeedbackUsers { get; set; } 
+        public DbSet<FeedbackUser> FeedbackUsers { get; set; }
         public DbSet<Opinion> Opinions { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Vote> Votes { get; set; }
