@@ -9,6 +9,7 @@ namespace Feedback.Data
         public _context(DbContextOptions options) : base(options)
         {
         }
+
         public DbSet<FeedbackUser> FeedbackUsers { get; set; }
         public DbSet<Opinion> Opinions { get; set; }
         public DbSet<Comment> Comments { get; set; }
@@ -41,14 +42,6 @@ namespace Feedback.Data
                 .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Comment - Comment (Kendi kendine referans)
-            modelBuilder.Entity<Comment>()
-    .HasOne(c => c.ParentComment)
-    .WithMany()
-    .HasForeignKey(c => c.ParentCommentId)
-    .OnDelete(DeleteBehavior.NoAction);
-
-
             // User - Vote ilişki tanımı
             modelBuilder.Entity<Vote>()
                 .HasOne(v => v.User)
@@ -57,10 +50,10 @@ namespace Feedback.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Comment>()
-        .HasOne(c => c.Opinion) // Opinion ile olan ilişki
-        .WithMany(f => f.Comments) // Opinion'dan gelen Comments koleksiyonu
-        .HasForeignKey(c => c.OpinionId) // Foreign key
-        .OnDelete(DeleteBehavior.Restrict); // Silinme davranışı
+                .HasOne(c => c.Opinion) // Opinion ile olan ilişki
+                .WithMany(f => f.Comments) // Opinion'dan gelen Comments koleksiyonu
+                .HasForeignKey(c => c.OpinionId) // Foreign key
+                .OnDelete(DeleteBehavior.Restrict); // Silinme davranışı
 
             // Feedback - Vote ilişki tanımı
             modelBuilder.Entity<Vote>()
@@ -97,7 +90,5 @@ namespace Feedback.Data
                 .HasForeignKey(fu => fu.OpinionId)
                 .OnDelete(DeleteBehavior.Restrict); // Cascade'ı kaldırdık
         }
-
-
     }
 }

@@ -26,18 +26,9 @@ public class CommentController : ControllerBase
                 Id = c.Id,
                 Content = c.Content,
                 CreatedAt = c.CreatedAt,
-                UserId = c.UserId, // UserId string olarak döndürülmeli
+                UserId = c.UserId.ToString(), // UserId string olarak döndürülmeli
                 OpinionId = c.OpinionId,
-                ParentCommentId = c.ParentCommentId, // Alt yorum ID'si
-                Replies = c.Replies.Select(r => new DtoAddComment
-                {
-                    Id = r.Id,
-                    Content = r.Content,
-                    CreatedAt = r.CreatedAt,
-                    UserId = r.UserId.ToString(), // Alt yorumların UserId'si
-                    OpinionId = r.OpinionId,
-                    ParentCommentId = r.ParentCommentId
-                }).ToList() // Alt yorumları DTO olarak dön
+                // Replies kaldırıldı
             })
             .ToListAsync();
 
@@ -49,8 +40,6 @@ public class CommentController : ControllerBase
     {
         var comment = await _context.Comments
             .Include(c => c.User)
-            .Include(c => c.Replies) // Alt yorumları dahil et
-            .ThenInclude(r => r.User) // Alt yorumların kullanıcılarını da dahil et
             .Where(c => c.Id == id)
             .Select(c => new DtoAddComment
             {
@@ -59,16 +48,7 @@ public class CommentController : ControllerBase
                 CreatedAt = c.CreatedAt,
                 UserId = c.UserId.ToString(), // UserId string olarak döndürülmeli
                 OpinionId = c.OpinionId,
-                ParentCommentId = c.ParentCommentId,
-                Replies = c.Replies.Select(r => new DtoAddComment
-                {
-                    Id = r.Id,
-                    Content = r.Content,
-                    CreatedAt = r.CreatedAt,
-                    UserId = r.UserId.ToString(), // Alt yorumların UserId'si
-                    OpinionId = r.OpinionId,
-                    ParentCommentId = r.ParentCommentId
-                }).ToList() // Alt yorumları DTO olarak dön
+                // Replies kaldırıldı
             })
             .FirstOrDefaultAsync();
 
@@ -96,7 +76,6 @@ public class CommentController : ControllerBase
             CreatedAt = DateTime.UtcNow,
             UserId = commentDto.UserId, // UserId integer olarak atanmalı
             OpinionId = commentDto.OpinionId,
-            ParentCommentId = commentDto.ParentCommentId // Alt yorum için ID
         };
 
         _context.Comments.Add(comment);
@@ -149,9 +128,7 @@ public class CommentController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteComment(int id)
     {
-        var comment = await _context.Comments
-            .Include(c => c.Replies) // Alt yorumları dahil et
-            .FirstOrDefaultAsync(c => c.Id == id);
+        var comment = await _context.Comments.FindAsync(id);
 
         if (comment == null)
         {
