@@ -23,12 +23,27 @@ namespace Feedback.Controllers
             _context = context;
         }
 
-        // GET: api/Opinions
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Opinion>>> GetOpinions()
+        public async Task<ActionResult<IEnumerable<DtoAddOpinion>>> GetOpinions()
         {
-            return await _context.Opinions.ToListAsync();
+            var opinions = await _context.Opinions
+                .Include(o => o.User) // Kullanıcıyı dahil et
+                .Select(o => new DtoAddOpinion
+                {
+                    Id = o.Id,
+                    Title = o.Title,
+                    Description = o.Description,
+                    Status = o.Status,
+                    Category = o.Category, // Enum olarak döndürülecek
+                    CreatedAt = o.CreatedAt,
+                    UserId = o.UserId, // Kullanıcı ID'sini al
+                })
+                .ToListAsync();
+
+            return Ok(opinions);
         }
+
+
 
         // GET: api/Opinions/5
         [HttpGet("{id}")]

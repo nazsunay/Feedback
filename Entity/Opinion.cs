@@ -7,7 +7,9 @@
         UX,
         Enhancement,
         Bug,
-        Feature
+        Feature,
+        General,
+        Feedback    // Bu değeri eklemeyi unutmuş olabilirsiniz
     }
 
     public class Opinion

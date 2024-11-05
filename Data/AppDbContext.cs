@@ -89,6 +89,12 @@ namespace Feedback.Data
                 .WithMany()
                 .HasForeignKey(fu => fu.OpinionId)
                 .OnDelete(DeleteBehavior.Restrict); // Cascade'ı kaldırdık
+
+            modelBuilder.Entity<Opinion>()
+           .Property(o => o.Category)
+           .HasConversion(
+               v => v.ToString(),
+               v => (OpinionCategory)Enum.Parse(typeof(OpinionCategory), v));
         }
     }
 }
