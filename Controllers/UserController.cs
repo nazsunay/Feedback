@@ -95,8 +95,29 @@ namespace Feedback.Controllers
 
             return Ok(userInfo);
         }
+        // Kullanıcı ID ile bilgilerini al
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
 
-       
+            if (user == null)
+            {
+                return NotFound("Kullanıcı bulunamadı.");
+            }
+
+            var userInfo = new
+            {
+                user.FirstName,
+                user.LastName,
+                user.Email,
+                user.Avatar,
+                user.Nickname
+            };
+
+            return Ok(userInfo);
+        }
+
 
     }
 }
