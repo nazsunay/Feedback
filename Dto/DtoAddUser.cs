@@ -1,8 +1,11 @@
-﻿namespace Feedback.Dto
+﻿using Feedback.Entity;
+
+namespace Feedback.Dto
 {
     public class DtoAddUser
     {
-        public string Id { get; set; }
+        public string UserId { get; set; }
         public string UserName { get; set; }
+        
     }
 }

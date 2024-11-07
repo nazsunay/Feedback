@@ -44,23 +44,20 @@ namespace Feedback.Controllers
         }
 
 
-
-        // GET: api/Opinions/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Opinion>> GetOpinion(int id)
+        public async Task<ActionResult<OpinionDto>> GetOpinion(int id)
         {
             var opinion = await _context.Opinions
-                         
-                .Include(o => o.Comments)       
-                .Include(o => o.Votes)          
+                .Include(o => o.Comments)
+                .Include(o => o.User)
                 .FirstOrDefaultAsync(o => o.Id == id);
 
             if (opinion == null)
             {
-                return NotFound(); 
+                return NotFound();
             }
 
-            var dto = new Opinion
+            var dto = new OpinionDto
             {
                 Id = opinion.Id,
                 Title = opinion.Title,
@@ -68,12 +65,23 @@ namespace Feedback.Controllers
                 Status = opinion.Status,
                 Category = opinion.Category,
                 CreatedAt = opinion.CreatedAt,
-                UserId = opinion.UserId,
-                
+                UserId = opinion.UserId, // UserId'yi burada al
+
+                Comments = opinion.Comments.Select(c => new DtoAddComment
+                {
+                    Id = c.Id,
+                    Content = c.Content,
+                    UserId = c.UserId,
+                    // Diğer gerekli özellikler
+                }).ToList()
             };
 
             return dto;
         }
+
+
+
+
 
         // POST: api/Opinions
         [HttpPost]

@@ -1,4 +1,6 @@
-﻿namespace Feedback.Entity
+﻿using Newtonsoft.Json;
+
+namespace Feedback.Entity
 {
     public enum OpinionCategory
     {
@@ -24,6 +26,7 @@
         // İlişkiler
         // İlişkiler
         public string UserId { get; set; } // İlişkili kullanıcının ID'si
+       
         public ApplicationUser User { get; set; } // İlişkili kullanıcı
 
         public ICollection<Comment> Comments { get; set; }
