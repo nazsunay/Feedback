@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace Feedback.Controllers
@@ -86,6 +87,7 @@ namespace Feedback.Controllers
 
             var userInfo = new
             {
+                user.Id, 
                 user.FirstName,
                 user.LastName,
                 user.Email,
@@ -95,6 +97,7 @@ namespace Feedback.Controllers
 
             return Ok(userInfo);
         }
+
         // Kullanıcı ID ile bilgilerini al
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(string id)
@@ -116,6 +119,24 @@ namespace Feedback.Controllers
             };
 
             return Ok(userInfo);
+        }
+        // Tüm kullanıcıları listele
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await _userManager.Users.ToListAsync();
+
+            var userInfos = users.Select(user => new
+            {
+                user.Id,
+                user.FirstName,
+                user.LastName,
+                user.Email,
+                user.Avatar,
+                user.Nickname
+            }).ToList();
+
+            return Ok(userInfos);
         }
 
 
